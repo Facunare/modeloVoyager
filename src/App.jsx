@@ -1,6 +1,6 @@
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useGLTF, Stars } from "@react-three/drei";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import "./App.css";
 
 function Voyager({ scrollProgress }) {
@@ -10,10 +10,12 @@ function Voyager({ scrollProgress }) {
   useFrame(() => {
     if (!ref.current) return;
 
-    ref.current.rotation.y += 0.004;
-
     const p = scrollProgress.current;
 
+    // Rotación constante
+    ref.current.rotation.y += 0.004;
+
+    // Movimiento de la nave según scroll
     if (p < 0.25) {
       ref.current.position.set(0, 0, 0);
       ref.current.scale.setScalar(1.4);
@@ -65,20 +67,18 @@ function Planet({ position, size, color }) {
 
 export default function App() {
   const scrollProgress = useRef(0);
-  const [section, setSection] = useState(0);
 
   useEffect(() => {
     function handleScroll() {
       const scrollTop = window.scrollY;
       const maxScroll = document.body.scrollHeight - window.innerHeight;
-      const progress = scrollTop / maxScroll;
 
-      scrollProgress.current = progress;
+      if (maxScroll <= 0) {
+        scrollProgress.current = 0;
+        return;
+      }
 
-      if (progress < 0.25) setSection(0);
-      else if (progress < 0.5) setSection(1);
-      else if (progress < 0.75) setSection(2);
-      else setSection(3);
+      scrollProgress.current = scrollTop / maxScroll;
     }
 
     window.addEventListener("scroll", handleScroll);
@@ -86,25 +86,6 @@ export default function App() {
 
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  const texts = [
-    {
-      title: "Una nave enviada desde la Tierra",
-      body: "En 1977, Voyager comenzó un viaje pensado para explorar los planetas gigantes del sistema solar.",
-    },
-    {
-      title: "El gran tour planetario",
-      body: "La nave aprovechó la gravedad de los planetas para impulsarse hacia regiones cada vez más lejanas.",
-    },
-    {
-      title: "Más allá de Júpiter y Saturno",
-      body: "Después de sus encuentros planetarios, Voyager dejó atrás su misión original y empezó a dirigirse hacia el borde del sistema solar.",
-    },
-    {
-      title: "Lejos, pero apenas saliendo de casa",
-      body: "Voyager es el objeto humano más lejano, pero en escala galáctica sigue estando cerca del Sol.",
-    },
-  ];
 
   return (
     <>
@@ -123,35 +104,7 @@ export default function App() {
         </Canvas>
       </div>
 
-      <main className="content">
-        <section>
-          <div className="text-box">
-            <h1>{texts[0].title}</h1>
-            <p>{texts[0].body}</p>
-          </div>
-        </section>
-
-        <section>
-          <div className="text-box">
-            <h1>{texts[1].title}</h1>
-            <p>{texts[1].body}</p>
-          </div>
-        </section>
-
-        <section>
-          <div className="text-box">
-            <h1>{texts[2].title}</h1>
-            <p>{texts[2].body}</p>
-          </div>
-        </section>
-
-        <section>
-          <div className="text-box">
-            <h1>{texts[3].title}</h1>
-            <p>{texts[3].body}</p>
-          </div>
-        </section>
-      </main>
+      <div className="scroll-space" />
     </>
   );
 }
